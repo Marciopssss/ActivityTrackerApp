@@ -1,4 +1,4 @@
-package com.community.activitytracker.utils
+package com.example.activitytrackerapp.utils
 
 import android.location.Location
 import com.community.activitytracker.data.model.ActivityType

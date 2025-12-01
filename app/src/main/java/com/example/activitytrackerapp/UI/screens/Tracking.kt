@@ -1,4 +1,4 @@
-package com.community.activitytracker.ui.screens
+package com.example.activitytrackerapp.ui.screens
 
 import android.content.Context
 import android.content.Intent

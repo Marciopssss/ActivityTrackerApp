@@ -1,4 +1,4 @@
-package com.community.activitytracker.data.database
+package com.example.activitytrackerapp.data.database
 
 import android.content.Context
 import androidx.room.*

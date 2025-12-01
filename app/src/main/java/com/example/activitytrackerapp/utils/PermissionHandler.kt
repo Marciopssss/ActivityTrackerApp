@@ -1,4 +1,4 @@
-package com.community.activitytracker.utils
+package com.example.activitytrackerapp.utils
 
 import android.Manifest
 import android.content.Context

@@ -1,4 +1,4 @@
-package com.community.activitytracker.viewmodel
+package com.example.activitytrackerapp.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -1,4 +1,4 @@
-package com.community.activitytracker.service
+package com.example.activitytrackerapp.service
 
 import android.Manifest
 import android.app.*

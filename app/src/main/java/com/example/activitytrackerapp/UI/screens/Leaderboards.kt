@@ -1,4 +1,4 @@
-package com.community.activitytracker.ui.screens
+package com.example.activitytrackerapp.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

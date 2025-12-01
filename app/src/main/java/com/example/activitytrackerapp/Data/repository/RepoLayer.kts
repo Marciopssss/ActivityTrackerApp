@@ -1,4 +1,4 @@
-package com.community.activitytracker.data.repository
+package com.community.activitytrackerapp.data.repository
 
 import com.community.activitytracker.data.database.ActivityDao
 import com.community.activitytracker.data.database.UserDao
@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.util.Calendar
 import java.util.Date
-import javax.inject.Inject
 
 /**
  * Repository for Activity operations
@@ -64,9 +63,6 @@ class ActivityRepository(
         return activityDao.getTotalActivities(userId)
     }
 
-    /**
-     * Get weekly statistics
-     */
     fun getWeeklyStats(userId: String): Flow<PeriodStats> {
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
@@ -83,9 +79,6 @@ class ActivityRepository(
         }
     }
 
-    /**
-     * Get monthly statistics
-     */
     fun getMonthlyStats(userId: String): Flow<PeriodStats> {
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.DAY_OF_MONTH, 1)
@@ -189,9 +182,6 @@ class AchievementRepository(
         achievementDao.unlockAchievement(achievementId, Date())
     }
 
-    /**
-     * Initialize default achievements for a user
-     */
     suspend fun initializeDefaultAchievements(userId: String) {
         val achievements = listOf(
             Achievement(userId = userId, title = "First Steps", description = "Complete your first activity", type = AchievementType.ACTIVITIES, threshold = 1),

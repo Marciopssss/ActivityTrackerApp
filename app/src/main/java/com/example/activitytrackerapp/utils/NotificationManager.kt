@@ -1,4 +1,4 @@
-package com.community.activitytracker.utils
+package com.example.activitytrackerapp.utils
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

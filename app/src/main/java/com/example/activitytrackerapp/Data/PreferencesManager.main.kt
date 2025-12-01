@@ -1,4 +1,4 @@
-package com.community.activitytracker.data
+package com.example.activitytrackerapp.data
 
 import android.content.Context
 import androidx.datastore.core.DataStore

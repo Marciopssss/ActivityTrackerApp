@@ -1,4 +1,4 @@
-package com.community.activitytracker.worker
+package com.example.activitytrackerapp.worker
 
 import android.content.Context
 import androidx.work.*

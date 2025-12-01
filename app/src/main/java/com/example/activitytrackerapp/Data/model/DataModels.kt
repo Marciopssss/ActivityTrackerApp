@@ -1,4 +1,4 @@
-package com.community.activitytracker.data.model
+package com.example.activitytrackerapp.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
