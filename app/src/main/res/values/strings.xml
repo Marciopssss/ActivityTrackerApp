@@ -1,3 +1,62 @@
 <resources>
-    <string name="app_name">ActivityTrackerApp</string>
+    <string name="app_name">Activity Tracker</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_leaderboard">Leaderboard</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- Activity Types -->
+    <string name="activity_walking">Walking</string>
+    <string name="activity_jogging">Jogging</string>
+    <string name="activity_cycling">Cycling</string>
+
+    <!-- Tracking -->
+    <string name="start_tracking">Start Tracking</string>
+    <string name="stop_tracking">Stop Tracking</string>
+    <string name="pause_tracking">Pause</string>
+    <string name="resume_tracking">Resume</string>
+    <string name="cancel_tracking">Cancel</string>
+    <string name="finish_tracking">Finish</string>
+
+    <!-- Stats -->
+    <string name="stat_distance">Distance</string>
+    <string name="stat_duration">Duration</string>
+    <string name="stat_speed">Speed</string>
+    <string name="stat_calories">Calories</string>
+    <string name="stat_activities">Activities</string>
+
+    <!-- Units -->
+    <string name="unit_km">km</string>
+    <string name="unit_kmh">km/h</string>
+    <string name="unit_min">min</string>
+    <string name="unit_cal">cal</string>
+
+    <!-- Messages -->
+    <string name="permission_required">Location permission is required to track your activities</string>
+    <string name="grant_permission">Grant Permission</string>
+    <string name="no_activities">No activities yet. Start tracking!</string>
+    <string name="no_achievements">No achievements yet. Keep going!</string>
+
+    <!-- Notifications -->
+    <string name="notification_tracking_title">Activity Tracking</string>
+    <string name="notification_tracking_text">Tracking in progress...</string>
+    <string name="notification_reminder_title">Time to move!</string>
+    <string name="notification_reminder_text">You haven\'t tracked an activity today</string>
+    <string name="notification_achievement_title">Achievement Unlocked!</string>
+
+    <!-- Profile -->
+    <string name="profile_total_distance">Total Distance</string>
+    <string name="profile_total_activities">Total Activities</string>
+    <string name="profile_current_streak">Current Streak</string>
+    <string name="profile_longest_streak">Longest Streak</string>
+
+    <!-- Leaderboard -->
+    <string name="leaderboard_your_rank">Your Rank</string>
+    <string name="leaderboard_not_ranked">Not ranked yet</string>
+    <string name="leaderboard_top_athletes">Top Athletes</string>
+
+    <!-- Errors -->
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="error_location">Unable to get location. Please check your settings.</string>
 </resources>
