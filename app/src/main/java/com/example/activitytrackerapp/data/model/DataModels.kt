@@ -18,7 +18,7 @@ enum class ActivityType {
 }
 
 /**
- * Location Point for route tracking
+ * Location point for route tracking
  */
 data class LocationPoint(
     val latitude: Double,
@@ -39,10 +39,10 @@ data class Activity(
     val type: ActivityType,
     val startTime: Date,
     val endTime: Date?,
-    val duration: Long, // in milliseconds
-    val distance: Double, // in meters
-    val avgSpeed: Double, // in m/s
-    val maxSpeed: Double, // in m/s
+    val duration: Long,       // milliseconds
+    val distance: Double,     // meters
+    val avgSpeed: Double,     // m/s
+    val maxSpeed: Double,     // m/s
     val calories: Int,
     val routePoints: List<LocationPoint>,
     val isCompleted: Boolean = false,
@@ -59,7 +59,7 @@ data class User(
     val username: String,
     val email: String,
     val profileImageUrl: String? = null,
-    val totalDistance: Double = 0.0, // in meters
+    val totalDistance: Double = 0.0,  // meters
     val totalActivities: Int = 0,
     val totalCalories: Int = 0,
     val currentStreak: Int = 0,
@@ -91,7 +91,7 @@ enum class AchievementType {
 }
 
 /**
- * Leaderboard Entry
+ * Leaderboard entry (not a Room table)
  */
 data class LeaderboardEntry(
     val userId: String,
@@ -103,10 +103,10 @@ data class LeaderboardEntry(
 )
 
 /**
- * Weekly/Monthly Statistics
+ * Weekly / Monthly Statistics model
  */
 data class PeriodStats(
-    val period: String, // e.g., "Week 48" or "November 2024"
+    val period: String,  // e.g. "Week 48", "November 2024"
     val totalDistance: Double,
     val totalActivities: Int,
     val totalDuration: Long,
@@ -115,49 +115,42 @@ data class PeriodStats(
 )
 
 /**
- * Type Converters for Room Database
+ * Room Type Converters
  */
 class Converters {
+
     private val gson = Gson()
 
+    // ----- ActivityType -----
     @TypeConverter
-    fun fromActivityType(value: ActivityType): String {
-        return value.name
-    }
+    fun fromActivityType(value: ActivityType): String = value.name
 
     @TypeConverter
-    fun toActivityType(value: String): ActivityType {
-        return ActivityType.valueOf(value)
-    }
+    fun toActivityType(value: String): ActivityType = ActivityType.valueOf(value)
+
+    // ----- Date -----
+    @TypeConverter
+    fun fromDate(date: Date?): Long? = date?.time
 
     @TypeConverter
-    fun fromDate(date: Date?): Long? {
-        return date?.time
-    }
+    fun toDate(timestamp: Long?): Date? = timestamp?.let { Date(it) }
+
+    // ----- Route List -----
+    @TypeConverter
+    fun fromLocationPointList(points: List<LocationPoint>): String =
+        gson.toJson(points)
 
     @TypeConverter
-    fun toDate(timestamp: Long?): Date? {
-        return timestamp?.let { Date(it) }
-    }
-
-    @TypeConverter
-    fun fromLocationPointList(points: List<LocationPoint>): String {
-        return gson.toJson(points)
-    }
-
-    @TypeConverter
-    fun toLocationPointList(value: String): List<LocationPoint> {
+    fun toLocationPointList(json: String): List<LocationPoint> {
         val listType = object : TypeToken<List<LocationPoint>>() {}.type
-        return gson.fromJson(value, listType)
+        return gson.fromJson(json, listType)
     }
 
+    // ----- AchievementType -----
     @TypeConverter
-    fun fromAchievementType(value: AchievementType): String {
-        return value.name
-    }
+    fun fromAchievementType(value: AchievementType): String = value.name
 
     @TypeConverter
-    fun toAchievementType(value: String): AchievementType {
-        return AchievementType.valueOf(value)
-    }
+    fun toAchievementType(value: String): AchievementType =
+        AchievementType.valueOf(value)
 }

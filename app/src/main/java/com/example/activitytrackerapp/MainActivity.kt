@@ -1,4 +1,4 @@
-package com.example.activitytrackerapp
+package com.example.activitytrackerapp.worker
 
 import android.Manifest
 import android.content.ComponentName

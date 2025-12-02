@@ -1,4 +1,4 @@
-package com.example.activitytrackerapp.theme
+package com.example.activitytrackerapp.ui.theme
 
 import android.app.Application
 import android.app.NotificationChannel
