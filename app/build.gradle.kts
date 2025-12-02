@@ -1,24 +1,24 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("com.google.devtools.ksp")
+    id("com.google.devtools.ksp") // just apply the plugin, no version!
 }
 
 android {
-    namespace = "com.community.activitytracker"
+    namespace = "com.example.activitytrackerapp"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.community.activitytracker"
+        applicationId = "com.example.activitytrackerapp"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
+        vectorDrawables.useSupportLibrary = true
+
+        manifestPlaceholders["MAPS_API_KEY"] = project.findProperty("MAPS_API_KEY") ?: ""
     }
 
     buildTypes {
@@ -76,10 +76,12 @@ dependencies {
     // Room Database
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
-    ksp("androidx.room:room-compiler:2.6.1")
+    ksp("androidx.room:room-compiler:2.6.1") // KSP compiler
 
     // Location Services
     implementation("com.google.android.gms:play-services-location:21.1.0")
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("com.google.maps.android:maps-compose:4.3.0")
 
     // WorkManager
     implementation("androidx.work:work-runtime-ktx:2.9.0")
@@ -88,7 +90,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 
-    // ViewModel
+    // ViewModel + Compose
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
 

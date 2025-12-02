@@ -2,7 +2,10 @@ package com.example.activitytrackerapp.data.database
 
 import android.content.Context
 import androidx.room.*
-import com.community.activitytracker.data.model.*
+import com.community.activitytrackerapp.data.model.*
+import com.example.activitytrackerapp.data.model.Achievement
+import com.example.activitytrackerapp.data.model.Activity
+import com.example.activitytrackerapp.data.model.User
 import kotlinx.coroutines.flow.Flow
 import java.util.Date
 
