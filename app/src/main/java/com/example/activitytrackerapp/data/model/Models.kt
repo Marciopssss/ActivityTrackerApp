@@ -117,40 +117,67 @@ data class PeriodStats(
 /**
  * Room Type Converters
  */
+/**
+ * Type Converters for Room Database
+ */
 class Converters {
 
-    private val gson = Gson()
-
-    // ----- ActivityType -----
     @TypeConverter
-    fun fromActivityType(value: ActivityType): String = value.name
-
-    @TypeConverter
-    fun toActivityType(value: String): ActivityType = ActivityType.valueOf(value)
-
-    // ----- Date -----
-    @TypeConverter
-    fun fromDate(date: Date?): Long? = date?.time
-
-    @TypeConverter
-    fun toDate(timestamp: Long?): Date? = timestamp?.let { Date(it) }
-
-    // ----- Route List -----
-    @TypeConverter
-    fun fromLocationPointList(points: List<LocationPoint>): String =
-        gson.toJson(points)
-
-    @TypeConverter
-    fun toLocationPointList(json: String): List<LocationPoint> {
-        val listType = object : TypeToken<List<LocationPoint>>() {}.type
-        return gson.fromJson(json, listType)
+    fun fromActivityType(value: ActivityType): String {
+        return value.name
     }
 
-    // ----- AchievementType -----
     @TypeConverter
-    fun fromAchievementType(value: AchievementType): String = value.name
+    fun toActivityType(value: String): ActivityType {
+        return ActivityType.valueOf(value)
+    }
 
     @TypeConverter
-    fun toAchievementType(value: String): AchievementType =
-        AchievementType.valueOf(value)
+    fun fromDate(date: Date?): Long? {
+        return date?.time
+    }
+
+    @TypeConverter
+    fun toDate(timestamp: Long?): Date? {
+        return timestamp?.let { Date(it) }
+    }
+
+    @TypeConverter
+    fun fromLocationPointList(points: List<LocationPoint>): String {
+        val sb = StringBuilder()
+        points.forEachIndexed { index, point ->
+            sb.append("${point.latitude},${point.longitude},${point.timestamp},${point.altitude}")
+            if (index < points.size - 1) {
+                sb.append(";")
+            }
+        }
+        return sb.toString()
+    }
+
+    @TypeConverter
+    fun toLocationPointList(value: String): List<LocationPoint> {
+        if (value.isEmpty()) return emptyList()
+
+        return value.split(";").mapNotNull { pointStr ->
+            val parts = pointStr.split(",")
+            if (parts.size >= 3) {
+                LocationPoint(
+                    latitude = parts[0].toDoubleOrNull() ?: 0.0,
+                    longitude = parts[1].toDoubleOrNull() ?: 0.0,
+                    timestamp = parts[2].toLongOrNull() ?: 0L,
+                    altitude = parts.getOrNull(3)?.toDoubleOrNull() ?: 0.0
+                )
+            } else null
+        }
+    }
+
+    @TypeConverter
+    fun fromAchievementType(value: AchievementType): String {
+        return value.name
+    }
+
+    @TypeConverter
+    fun toAchievementType(value: String): AchievementType {
+        return AchievementType.valueOf(value)
+    }
 }

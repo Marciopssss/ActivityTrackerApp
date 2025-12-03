@@ -1,4 +1,4 @@
-package com.example.activitytrackerapp.worker
+package com.example.activitytrackerapp
 
 import android.Manifest
 import android.content.ComponentName
@@ -22,25 +22,24 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.community.activitytracker.data.database.ActivityTrackerDatabase
-import com.community.activitytracker.data.repository.ActivityRepository
-import com.community.activitytracker.data.repository.AchievementRepository
-import com.community.activitytracker.data.repository.UserRepository
-import com.community.activitytracker.service.TrackingService
-import com.community.activitytracker.ui.screens.*
-import com.community.activitytracker.ui.theme.ActivityTrackerTheme
-import com.community.activitytracker.viewmodel.LeaderboardViewModel
-import com.community.activitytracker.viewmodel.ProfileViewModel
-import com.community.activitytracker.viewmodel.TrackingViewModel
+import com.example.activitytrackerapp.data.database.ActivityTrackerDatabase
+import com.example.activitytrackerapp.data.model.Achievement
+import com.example.activitytrackerapp.data.repository.*
+import com.example.activitytrackerapp.service.GPS_Tracking
+import com.example.activitytrackerapp.ui.screens.*
+import com.example.activitytrackerapp.ui.theme.*
+import com.example.activitytrackerapp.viewModel.LeaderboardViewModel
+import com.example.activitytrackerapp.viewModel.ProfileViewModel
+import com.example.activitytrackerapp.viewModel.TrackingViewModel
 
 class MainActivity : ComponentActivity() {
 
-    private var trackingService: TrackingService? = null
+    private var trackingService: GPS_Tracking? = null
     private var serviceBound = false
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val binder = service as TrackingService.TrackingBinder
+            val binder = service as GPS_Tracking.TrackingBinder
             trackingService = binder.getService()
             serviceBound = true
         }
@@ -98,7 +97,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
-        Intent(this, TrackingService::class.java).also { intent ->
+        Intent(this, GPS_Tracking::class.java).also { intent ->
             bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
         }
     }
@@ -134,6 +133,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 
 @Composable
 fun ActivityTrackerApp(

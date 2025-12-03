@@ -2,8 +2,8 @@ package com.example.activitytrackerapp.worker
 
 import android.content.Context
 import androidx.work.*
-import com.community.activitytracker.data.database.ActivityTrackerDatabase
-import com.community.activitytracker.data.repository.UserRepository
+import com.example.activitytrackerapp.data.database.ActivityTrackerDatabase
+import com.example.activitytrackerapp.data.repository.*
 import java.util.concurrent.TimeUnit
 
 /**

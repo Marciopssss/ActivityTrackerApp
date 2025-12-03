@@ -1,5 +1,6 @@
 package com.example.activitytrackerapp.service
 
+import com.example.activitytrackerapp.MainActivity
 import android.Manifest
 import android.app.*
 import android.content.Context
@@ -12,9 +13,8 @@ import android.os.IBinder
 import android.os.Looper
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
-import com.community.activitytracker.MainActivity
-import com.community.activitytracker.R
-import com.community.activitytracker.data.model.LocationPoint
+import com.example.activitytrackerapp.R
+import com.example.activitytrackerapp.data.model.LocationPoint
 import com.google.android.gms.location.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -2,10 +2,8 @@ package com.example.activitytrackerapp.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.community.activitytracker.data.model.*
-import com.community.activitytracker.data.repository.ActivityRepository
-import com.community.activitytracker.data.repository.UserRepository
-import com.community.activitytracker.data.repository.AchievementRepository
+import com.example.activitytrackerapp.data.model.*
+import com.example.activitytrackerapp.data.repository.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.Date

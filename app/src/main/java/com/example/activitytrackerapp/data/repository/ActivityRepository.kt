@@ -1,21 +1,18 @@
-package com.community.activitytrackerapp.data.repository
+package com.example.activitytrackerapp.data.repository
 
-import com.community.activitytracker.data.database.ActivityDao
-import com.community.activitytracker.data.database.UserDao
-import com.community.activitytracker.data.database.AchievementDao
-import com.community.activitytracker.data.model.*
+import com.example.activitytrackerapp.data.database.ActivityDao
+import com.example.activitytrackerapp.data.database.UserDao
+import com.example.activitytrackerapp.data.model.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.util.Calendar
 import java.util.Date
 
-/**
- * Repository for Activity operations
- */
 class ActivityRepository(
     private val activityDao: ActivityDao,
     private val userDao: UserDao
 ) {
+
     fun getActivitiesByUser(userId: String): Flow<List<Activity>> {
         return activityDao.getActivitiesByUser(userId)
     }
@@ -39,7 +36,6 @@ class ActivityRepository(
         )
         activityDao.update(completed)
 
-        // Update user stats
         userDao.updateUserStats(activity.userId, activity.distance)
     }
 
@@ -99,13 +95,13 @@ class ActivityRepository(
     }
 
     private fun calculatePeriodStats(activities: List<Activity>, period: String): PeriodStats {
-        val totalDistance = activities.sumOf { it.distance }
+        val totalDistance = activities.sumOf { it.distance.toDouble() }
         val totalActivities = activities.size
-        val totalDuration = activities.sumOf { it.duration }
+        val totalDuration = activities.sumOf { it.duration.toLong() }
         val avgSpeed = if (activities.isNotEmpty()) {
             activities.map { it.avgSpeed }.average()
         } else 0.0
-        val totalCalories = activities.sumOf { it.calories }
+        val totalCalories = activities.sumOf { it.calories.toInt() }
 
         return PeriodStats(
             period = period,
@@ -115,83 +111,5 @@ class ActivityRepository(
             avgSpeed = avgSpeed,
             totalCalories = totalCalories
         )
-    }
-}
-
-/**
- * Repository for User operations
- */
-class UserRepository(
-    private val userDao: UserDao
-) {
-    suspend fun insertUser(user: User) {
-        userDao.insert(user)
-    }
-
-    suspend fun updateUser(user: User) {
-        userDao.update(user)
-    }
-
-    suspend fun getUserById(userId: String): User? {
-        return userDao.getUserById(userId)
-    }
-
-    fun getUserByIdFlow(userId: String): Flow<User?> {
-        return userDao.getUserByIdFlow(userId)
-    }
-
-    fun getLeaderboard(limit: Int = 10): Flow<List<LeaderboardEntry>> {
-        return userDao.getTopUsersByDistance(limit).map { users ->
-            users.mapIndexed { index, user ->
-                LeaderboardEntry(
-                    userId = user.id,
-                    username = user.username,
-                    totalDistance = user.totalDistance,
-                    totalActivities = user.totalActivities,
-                    rank = index + 1,
-                    profileImageUrl = user.profileImageUrl
-                )
-            }
-        }
-    }
-
-    suspend fun updateStreak(userId: String, streak: Int) {
-        userDao.updateStreak(userId, streak)
-    }
-}
-
-/**
- * Repository for Achievement operations
- */
-class AchievementRepository(
-    private val achievementDao: AchievementDao
-) {
-    fun getAchievementsByUser(userId: String): Flow<List<Achievement>> {
-        return achievementDao.getAchievementsByUser(userId)
-    }
-
-    fun getUnlockedAchievements(userId: String): Flow<List<Achievement>> {
-        return achievementDao.getUnlockedAchievements(userId)
-    }
-
-    suspend fun insertAchievement(achievement: Achievement): Long {
-        return achievementDao.insert(achievement)
-    }
-
-    suspend fun unlockAchievement(achievementId: Long) {
-        achievementDao.unlockAchievement(achievementId, Date())
-    }
-
-    suspend fun initializeDefaultAchievements(userId: String) {
-        val achievements = listOf(
-            Achievement(userId = userId, title = "First Steps", description = "Complete your first activity", type = AchievementType.ACTIVITIES, threshold = 1),
-            Achievement(userId = userId, title = "10K Club", description = "Walk/Run 10 kilometers", type = AchievementType.DISTANCE, threshold = 10000),
-            Achievement(userId = userId, title = "Marathon", description = "Complete 42.2 kilometers", type = AchievementType.DISTANCE, threshold = 42195),
-            Achievement(userId = userId, title = "Consistent", description = "Maintain a 7-day streak", type = AchievementType.STREAK, threshold = 7),
-            Achievement(userId = userId, title = "Dedicated", description = "Complete 50 activities", type = AchievementType.ACTIVITIES, threshold = 50),
-            Achievement(userId = userId, title = "Speed Demon", description = "Reach 25 km/h", type = AchievementType.SPEED, threshold = 25)
-        )
-
-        achievements.forEach { insertAchievement(it) }
     }
 }
