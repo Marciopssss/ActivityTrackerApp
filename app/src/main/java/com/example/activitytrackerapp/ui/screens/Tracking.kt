@@ -12,9 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.community.activitytracker.data.model.ActivityType
-import com.community.activitytracker.service.TrackingService
-import com.community.activitytracker.viewmodel.TrackingViewModel
+import com.example.activitytrackerapp.data.model.ActivityType
+import com.example.activitytrackerapp.service.TrackingService
+import com.example.activitytrackerapp.viewModel.TrackingViewModel
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)

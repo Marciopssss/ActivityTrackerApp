@@ -1,5 +1,6 @@
 package com.example.activitytrackerapp.ui.screens
 
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,10 +14,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.community.activitytracker.data.model.Activity
-import com.community.activitytracker.data.model.ActivityType
-import com.community.activitytracker.service.TrackingService
-import com.community.activitytracker.viewmodel.TrackingViewModel
+import com.example.activitytrackerapp.data.model.Activity
+import com.example.activitytrackerapp.data.model.ActivityType
+import com.example.activitytrackerapp.service.TrackingService
+import com.example.activitytrackerapp.viewModel.TrackingViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -196,10 +197,13 @@ fun ActivityCard(activity: Activity) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                when (activity.type) {
-                    ActivityType.WALKING -> Icons.Default.DirectionsWalk
-                    ActivityType.JOGGING -> Icons.Default.DirectionsRun
-                    ActivityType.CYCLING -> Icons.Default.DirectionsBike
+                painter = when(activity.type) {
+                    ActivityType.WALKING -> painterResource(id = R.drawable.ic_walking)
+                    ActivityType.JOGGING -> painterResource(id = R.drawable.ic_jogging)
+                    ActivityType.RUNNING -> painterResource(id = R.drawable.ic_running)
+                    ActivityType.CYCLING -> painterResource(id = R.drawable.ic_cycling)
+                    ActivityType.SPEED -> painterResource(id = R.drawable.ic_speed)
+                    ActivityType.ACTIVITIES -> painterResource(id = R.drawable.ic_activities)
                 },
                 contentDescription = null,
                 modifier = Modifier.size(40.dp),

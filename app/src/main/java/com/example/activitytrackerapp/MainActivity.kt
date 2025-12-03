@@ -25,7 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.activitytrackerapp.data.database.ActivityTrackerDatabase
 import com.example.activitytrackerapp.data.model.Achievement
 import com.example.activitytrackerapp.data.repository.*
-import com.example.activitytrackerapp.service.GPS_Tracking
+import com.example.activitytrackerapp.service.TrackingService
 import com.example.activitytrackerapp.ui.screens.*
 import com.example.activitytrackerapp.ui.theme.*
 import com.example.activitytrackerapp.viewModel.LeaderboardViewModel
@@ -34,12 +34,12 @@ import com.example.activitytrackerapp.viewModel.TrackingViewModel
 
 class MainActivity : ComponentActivity() {
 
-    private var trackingService: GPS_Tracking? = null
+    private var trackingService: TrackingService? = null
     private var serviceBound = false
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val binder = service as GPS_Tracking.TrackingBinder
+            val binder = service as TrackingService.TrackingBinder
             trackingService = binder.getService()
             serviceBound = true
         }
@@ -79,7 +79,7 @@ class MainActivity : ComponentActivity() {
         checkAndRequestPermissions()
 
         setContent {
-            ActivityTrackerTheme {
+            ActivityTrackertheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -97,7 +97,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
-        Intent(this, GPS_Tracking::class.java).also { intent ->
+        Intent(this, TrackingService::class.java).also { intent ->
             bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
         }
     }

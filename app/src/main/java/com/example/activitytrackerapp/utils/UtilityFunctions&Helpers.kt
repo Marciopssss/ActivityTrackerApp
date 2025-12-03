@@ -1,8 +1,8 @@
 package com.example.activitytrackerapp.utils
 
 import android.location.Location
-import com.community.activitytracker.data.model.ActivityType
-import com.community.activitytracker.data.model.LocationPoint
+import com.example.activitytrackerapp.data.model.ActivityType
+import com.example.activitytrackerapp.data.model.LocationPoint
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.*

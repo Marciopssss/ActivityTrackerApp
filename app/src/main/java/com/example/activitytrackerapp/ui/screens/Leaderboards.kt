@@ -15,10 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.community.activitytracker.data.model.Achievement
-import com.community.activitytracker.data.model.LeaderboardEntry
-import com.community.activitytracker.viewmodel.LeaderboardViewModel
-import com.community.activitytracker.viewmodel.ProfileViewModel
+import com.example.activitytrackerapp.data.model.Achievement
+import com.example.activitytrackerapp.data.model.LeaderboardEntry
+import com.example.activitytrackerapp.viewModel.LeaderboardViewModel
+import com.example.activitytrackerapp.viewModel.ProfileViewModel
 
 /**
  * Leaderboard Screen

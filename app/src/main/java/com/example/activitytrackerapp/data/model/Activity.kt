@@ -7,7 +7,7 @@ import java.util.Date
 
 @Entity(tableName = "activities")
 @TypeConverters(Converters::class)
-data class `Activity.kt`(
+data class `Activity`(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val userId: String,

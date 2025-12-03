@@ -8,9 +8,6 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.Date
 
-/**
- * Main ViewModel for tracking activities
- */
 class TrackingViewModel(
     private val activityRepository: ActivityRepository,
     private val userRepository: UserRepository
@@ -124,7 +121,6 @@ class TrackingViewModel(
         val hours = duration / (1000.0 * 60 * 60)
         val km = distance / 1000.0
 
-        // MET values (Metabolic Equivalent of Task)
         val met = when (type) {
             ActivityType.WALKING -> 3.5
             ActivityType.JOGGING -> 7.0
@@ -138,70 +134,4 @@ class TrackingViewModel(
     enum class TrackingState {
         IDLE, TRACKING, PAUSED
     }
-}
-
-/**
- * ViewModel for user profile and statistics
- */
-class ProfileViewModel(
-    private val userRepository: UserRepository,
-    private val activityRepository: ActivityRepository,
-    private val achievementRepository: AchievementRepository
-) : ViewModel() {
-
-    private val _currentUserId = MutableStateFlow("user_default")
-    val currentUserId: StateFlow<String> = _currentUserId.asStateFlow()
-
-    val currentUser = currentUserId.flatMapLatest { userId ->
-        userRepository.getUserByIdFlow(userId)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
-
-    val achievements = currentUserId.flatMapLatest { userId ->
-        achievementRepository.getAchievementsByUser(userId)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-    val recentActivities = currentUserId.flatMapLatest { userId ->
-        activityRepository.getRecentActivities(userId, 20)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-    fun updateUserProfile(username: String, email: String) {
-        viewModelScope.launch {
-            currentUser.value?.let { user ->
-                val updated = user.copy(username = username, email = email)
-                userRepository.updateUser(updated)
-            }
-        }
-    }
-
-    fun initializeUser() {
-        viewModelScope.launch {
-            val existingUser = userRepository.getUserById(_currentUserId.value)
-            if (existingUser == null) {
-                val newUser = User(
-                    id = _currentUserId.value,
-                    username = "Guest User",
-                    email = "guest@activitytracker.com"
-                )
-                userRepository.insertUser(newUser)
-                achievementRepository.initializeDefaultAchievements(_currentUserId.value)
-            }
-        }
-    }
-}
-
-/**
- * ViewModel for leaderboard
- */
-class LeaderboardViewModel(
-    private val userRepository: UserRepository
-) : ViewModel() {
-
-    val leaderboard = userRepository.getLeaderboard(20)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-    private val _currentUserId = MutableStateFlow("user_default")
-
-    val currentUserRank = combine(leaderboard, _currentUserId) { board, userId ->
-        board.find { it.userId == userId }?.rank ?: -1
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), -1)
 }

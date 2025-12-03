@@ -7,8 +7,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import com.community.activitytracker.MainActivity
-import com.community.activitytracker.R
+import com.example.activitytrackerapp.MainActivity
+import com.example.activitytrackerapp.R
 
 /**
  * Manages all notifications in the app
