@@ -174,6 +174,7 @@ object CalorieCalculator {
                     else -> 4.3         // Fast walking
                 }
             }
+
             ActivityType.JOGGING -> {
                 val speed = kilometers / hours
                 when {
@@ -182,6 +183,7 @@ object CalorieCalculator {
                     else -> 9.8         // Fast running
                 }
             }
+
             ActivityType.CYCLING -> {
                 val speed = kilometers / hours
                 when {
@@ -191,6 +193,18 @@ object CalorieCalculator {
                     else -> 12.0         // Very fast cycling
                 }
             }
+
+            ActivityType.RUNNING -> {
+                val speed = kilometers / hours
+                when {
+                    speed < 10.0 -> 9.8   // Moderate running
+                    speed < 13.0 -> 11.0  // Fast running
+                    else -> 14.5          // Very fast running
+                }
+            }
+
+            ActivityType.SPEED -> 8.0      // Default MET for speed training
+            ActivityType.ACTIVITIES -> 4.0
         }
 
         // Calories = MET × weight (kg) × time (hours)

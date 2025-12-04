@@ -125,6 +125,9 @@ class TrackingViewModel(
             ActivityType.WALKING -> 3.5
             ActivityType.JOGGING -> 7.0
             ActivityType.CYCLING -> 8.0
+            ActivityType.RUNNING -> 11.0
+            ActivityType.SPEED -> 8.0
+            ActivityType.ACTIVITIES -> 4.0
         }
 
         val weight = 70.0 // Assume 70kg, can be customized
