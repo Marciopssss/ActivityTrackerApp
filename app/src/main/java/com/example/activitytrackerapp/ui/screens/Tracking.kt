@@ -1,7 +1,10 @@
 package com.example.activitytrackerapp.ui.screens
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -9,12 +12,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.activitytrackerapp.data.model.ActivityType
+import com.example.activitytrackerapp.data.model.LocationPoint
 import com.example.activitytrackerapp.service.TrackingService
 import com.example.activitytrackerapp.viewModel.TrackingViewModel
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.*
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,18 +41,27 @@ fun TrackingScreen(
 
     val distance by trackingService?.totalDistance?.collectAsState() ?: remember { mutableStateOf(0.0) }
     val speed by trackingService?.currentSpeed?.collectAsState() ?: remember { mutableStateOf(0f) }
+    val routePoints by trackingService?.routePoints?.collectAsState() ?: remember { mutableStateOf(emptyList()) }
 
-    var elapsedTime by remember { mutableStateOf(0L) }
+    val elapsedTime by viewModel.elapsedTime.collectAsState()
 
-    // Timer
-    LaunchedEffect(isTracking && !isPaused) {
-        if (isTracking && !isPaused) {
-            while (true) {
-                elapsedTime = trackingService?.getElapsedTime() ?: 0L
-                delay(1000)
-            }
-        }
+
+    // Permission launcher
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { /* permissions handled if needed */ }
+
+    // Request permissions once
+    LaunchedEffect(Unit) {
+        permissionLauncher.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.POST_NOTIFICATIONS
+            )
+        )
     }
+
 
     Scaffold(
         topBar = {
@@ -62,214 +79,301 @@ fun TrackingScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Activity Type Selection
-            if (!isTracking) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        "Select Activity Type",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
+            // Map
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.5f)
+            ) {
+                MapViewComponent(
+                    routePoints = routePoints,
+                    pins = listOfNotNull(routePoints.firstOrNull(), routePoints.lastOrNull())
+                )
+            }
 
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+            // Stats and Controls
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.5f)
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Activity type selection if not tracking
+                if (!isTracking) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        ActivityTypeButton(
-                            type = ActivityType.WALKING,
-                            icon = Icons.Default.DirectionsWalk,
-                            isSelected = selectedActivityType == ActivityType.WALKING,
-                            onClick = { selectedActivityType = ActivityType.WALKING },
-                            modifier = Modifier.weight(1f)
+                        Text(
+                            "Select Activity Type",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold
                         )
-                        ActivityTypeButton(
-                            type = ActivityType.JOGGING,
-                            icon = Icons.Default.DirectionsRun,
-                            isSelected = selectedActivityType == ActivityType.JOGGING,
-                            onClick = { selectedActivityType = ActivityType.JOGGING },
-                            modifier = Modifier.weight(1f)
-                        )
-                        ActivityTypeButton(
-                            type = ActivityType.CYCLING,
-                            icon = Icons.Default.DirectionsBike,
-                            isSelected = selectedActivityType == ActivityType.CYCLING,
-                            onClick = { selectedActivityType = ActivityType.CYCLING },
-                            modifier = Modifier.weight(1f)
-                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            ActivityTypeButton(
+                                type = ActivityType.WALKING,
+                                icon = Icons.Default.DirectionsWalk,
+                                isSelected = selectedActivityType == ActivityType.WALKING,
+                                onClick = { selectedActivityType = ActivityType.WALKING },
+                                modifier = Modifier.weight(1f)
+                            )
+                            ActivityTypeButton(
+                                type = ActivityType.JOGGING,
+                                icon = Icons.Default.DirectionsRun,
+                                isSelected = selectedActivityType == ActivityType.JOGGING,
+                                onClick = { selectedActivityType = ActivityType.JOGGING },
+                                modifier = Modifier.weight(1f)
+                            )
+                            ActivityTypeButton(
+                                type = ActivityType.CYCLING,
+                                icon = Icons.Default.DirectionsBike,
+                                isSelected = selectedActivityType == ActivityType.CYCLING,
+                                onClick = { selectedActivityType = ActivityType.CYCLING },
+                                modifier = Modifier.weight(1f)
+                            )
+                            ActivityTypeButton(
+                                type = ActivityType.RUNNING,
+                                icon = Icons.Default.DirectionsRun,
+                                isSelected = selectedActivityType == ActivityType.RUNNING,
+                                onClick = { selectedActivityType = ActivityType.RUNNING },
+                                modifier = Modifier.weight(1f)
+                            )
+
+                        }
                     }
                 }
-            }
 
-            // Stats Display
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(24.dp),
-                modifier = Modifier.weight(1f).wrapContentHeight()
-            ) {
-                // Time
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    )
-                ) {
+                // Stats display if tracking
+                if (isTracking) {
                     Column(
-                        modifier = Modifier
-                            .padding(24.dp)
-                            .fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(
-                            "Time",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
                         Text(
                             formatTime(elapsedTime),
-                            style = MaterialTheme.typography.displayLarge,
+                            style = MaterialTheme.typography.displayMedium,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                            color = MaterialTheme.colorScheme.primary
                         )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            StatChip(
+                                label = "Distance",
+                                value = "%.2f km".format(distance / 1000),
+                                modifier = Modifier.weight(1f)
+                            )
+                            StatChip(
+                                label = "Speed",
+                                value = "%.1f km/h".format(speed * 3.6),
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
                 }
 
-                // Distance & Speed
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Control Buttons
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    MetricCard(
-                        title = "Distance",
-                        value = "%.2f".format(distance / 1000),
-                        unit = "km",
-                        modifier = Modifier.weight(1f)
-                    )
-                    MetricCard(
-                        title = "Speed",
-                        value = "%.1f".format(speed * 3.6),
-                        unit = "km/h",
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
+                    if (!isTracking) {
+                        Button(
+                            onClick = {
+                                startTrackingService(context)
+                                isTracking = true
+                                viewModel.startActivity(selectedActivityType)
+                                trackingService?.startTracking()
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                        ) {
+                            Icon(Icons.Default.PlayArrow, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Start", style = MaterialTheme.typography.titleMedium)
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            if (!isPaused) {
+                                Button(
+                                    onClick = {
+                                        isPaused = true
+                                        trackingService?.pauseTracking()
+                                        viewModel.pauseActivity()
+                                    },
+                                    modifier = Modifier.weight(1f).height(56.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.secondary
+                                    )
+                                ) {
+                                    Icon(Icons.Default.Pause, contentDescription = null)
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("Pause")
+                                }
+                            } else {
+                                Button(
+                                    onClick = {
+                                        isPaused = false
+                                        trackingService?.resumeTracking()
+                                        viewModel.resumeActivity()
+                                    },
+                                    modifier = Modifier.weight(1f).height(56.dp)
+                                ) {
+                                    Icon(Icons.Default.PlayArrow, contentDescription = null)
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("Resume")
+                                }
+                            }
 
-            // Control Buttons
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                if (!isTracking) {
-                    Button(
-                        onClick = {
-                            isTracking = true
-                            viewModel.startActivity(selectedActivityType)
-                            startTrackingService(context)
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
-                    ) {
-                        Icon(Icons.Default.PlayArrow, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Start", style = MaterialTheme.typography.titleMedium)
-                    }
-                } else {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        if (!isPaused) {
                             Button(
                                 onClick = {
-                                    isPaused = true
-                                    trackingService?.pauseTracking()
-                                    viewModel.pauseActivity()
+                                    trackingService?.routePoints?.value?.let { points ->
+                                        viewModel.updateActivity(
+                                            distance = distance,
+                                            speed = speed.toDouble(),
+                                            routePoints = points,
+                                            duration = elapsedTime
+                                        )
+                                    }
+                                    viewModel.completeActivity()
+                                    trackingService?.stopTracking()
+                                    isTracking = false
+                                    isPaused = false
+                                    onNavigateBack()
                                 },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(56.dp),
+                                modifier = Modifier.weight(1f).height(56.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.secondary
+                                    containerColor = MaterialTheme.colorScheme.tertiary
                                 )
                             ) {
-                                Icon(Icons.Default.Pause, contentDescription = null)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Pause")
-                            }
-                        } else {
-                            Button(
-                                onClick = {
-                                    isPaused = false
-                                    trackingService?.resumeTracking()
-                                    viewModel.resumeActivity()
-                                },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(56.dp)
-                            ) {
-                                Icon(Icons.Default.PlayArrow, contentDescription = null)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Resume")
+                                Icon(Icons.Default.Stop, contentDescription = null)
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Finish")
                             }
                         }
 
-                        Button(
+                        OutlinedButton(
                             onClick = {
-                                trackingService?.routePoints?.value?.let { points ->
-                                    viewModel.updateActivity(
-                                        distance = distance,
-                                        speed = speed.toDouble(),
-                                        routePoints = points,
-                                        duration = elapsedTime
-                                    )
-                                }
-                                viewModel.completeActivity()
+                                viewModel.cancelActivity()
                                 trackingService?.stopTracking()
                                 isTracking = false
                                 isPaused = false
                                 onNavigateBack()
                             },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(56.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.tertiary
-                            )
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Icon(Icons.Default.Stop, contentDescription = null)
+                            Icon(Icons.Default.Close, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Finish")
+                            Text("Cancel")
                         }
-                    }
-
-                    OutlinedButton(
-                        onClick = {
-                            viewModel.cancelActivity()
-                            trackingService?.stopTracking()
-                            isTracking = false
-                            isPaused = false
-                            onNavigateBack()
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(Icons.Default.Close, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Cancel")
                     }
                 }
             }
         }
     }
 }
+
+
+@Composable
+fun MapViewComponent(
+    routePoints: List<LocationPoint>,
+    pins: List<LocationPoint> = emptyList(), // pre-defined pins if needed
+    modifier: Modifier = Modifier
+) {
+    val cameraPositionState = rememberCameraPositionState()
+    val defaultLocation = LatLng(33.8886, 35.4955) // Beirut fallback
+
+    // Mutable state for user-added pins
+    var userPins by remember { mutableStateOf(listOf<LatLng>()) }
+
+    // Combine route pins and user-added pins for display
+    val allPins = userPins + pins.map { LatLng(it.latitude, it.longitude) }
+
+    // Center camera on last route point if available
+    LaunchedEffect(routePoints.lastOrNull()) {
+        routePoints.lastOrNull()?.let { point ->
+            cameraPositionState.position = CameraPosition.fromLatLngZoom(
+                LatLng(point.latitude, point.longitude),
+                17f
+            )
+        } ?: run {
+            cameraPositionState.position = CameraPosition.fromLatLngZoom(defaultLocation, 15f)
+        }
+    }
+
+    GoogleMap(
+        modifier = modifier.fillMaxSize(),
+        cameraPositionState = cameraPositionState,
+        properties = MapProperties(
+            isMyLocationEnabled = true,
+            mapType = MapType.NORMAL
+        ),
+        uiSettings = MapUiSettings(
+            zoomControlsEnabled = false,
+            zoomGesturesEnabled = true,
+            scrollGesturesEnabled = true,
+            rotationGesturesEnabled = true,
+            tiltGesturesEnabled = true,
+            compassEnabled = true,
+            myLocationButtonEnabled = true,
+            mapToolbarEnabled = false
+        ),
+        onMapClick = { latLng ->
+            // Add pin on map tap
+            userPins = userPins + latLng
+        }
+    ) {
+        // Draw route polyline
+        if (routePoints.size >= 2) {
+            Polyline(
+                points = routePoints.map { LatLng(it.latitude, it.longitude) },
+                color = Color(0xFF2196F3),
+                width = 12f
+            )
+        }
+
+        // Start marker
+        routePoints.firstOrNull()?.let { start ->
+            Marker(
+                state = MarkerState(LatLng(start.latitude, start.longitude)),
+                title = "Start"
+            )
+        }
+
+        // End marker
+        routePoints.lastOrNull()?.let { end ->
+            Marker(
+                state = MarkerState(LatLng(end.latitude, end.longitude)),
+                title = "End"
+            )
+        }
+
+        // Show all user-added pins (or pre-defined pins)
+        allPins.forEachIndexed { index, pin ->
+            Marker(
+                state = MarkerState(pin),
+                title = "Pin ${index + 1}"
+            )
+        }
+    }
+}
+
 
 @Composable
 fun ActivityTypeButton(
@@ -281,7 +385,7 @@ fun ActivityTypeButton(
 ) {
     Card(
         onClick = onClick,
-        modifier = modifier.aspectRatio(1f),
+        modifier = modifier.height(100.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected)
                 MaterialTheme.colorScheme.primaryContainer
@@ -293,25 +397,23 @@ fun ActivityTypeButton(
         )
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxSize().padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Icon(
                 icon,
                 contentDescription = null,
-                modifier = Modifier.size(48.dp),
+                modifier = Modifier.size(32.dp),
                 tint = if (isSelected)
                     MaterialTheme.colorScheme.onPrimaryContainer
                 else
                     MaterialTheme.colorScheme.onSurface
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 type.name.lowercase().replaceFirstChar { it.uppercase() },
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.labelMedium,
                 color = if (isSelected)
                     MaterialTheme.colorScheme.onPrimaryContainer
                 else
@@ -322,10 +424,9 @@ fun ActivityTypeButton(
 }
 
 @Composable
-fun MetricCard(
-    title: String,
+fun StatChip(
+    label: String,
     value: String,
-    unit: String,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -335,34 +436,20 @@ fun MetricCard(
         )
     ) {
         Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
+            modifier = Modifier.padding(12.dp).fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                title,
-                style = MaterialTheme.typography.titleSmall,
+                label,
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSecondaryContainer
             )
-            Row(
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    value,
-                    style = MaterialTheme.typography.displayMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    unit,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-            }
+            Text(
+                value,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
         }
     }
 }
@@ -376,6 +463,10 @@ private fun formatTime(millis: Long): String {
 
 private fun startTrackingService(context: Context) {
     Intent(context, TrackingService::class.java).also {
-        context.startForegroundService(it)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            context.startForegroundService(it)
+        } else {
+            context.startService(it)
+        }
     }
 }

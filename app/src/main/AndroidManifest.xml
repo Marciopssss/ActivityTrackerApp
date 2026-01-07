@@ -17,7 +17,6 @@
         android:required="true" />
 
     <application
-        android:name=".ActivityTrackerApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -27,6 +26,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ActivityTracker"
         tools:targetApi="31">
+
+        <!-- Google Maps API Key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
 
         <!-- Main Activity -->
         <activity
@@ -42,7 +46,7 @@
 
         <!-- Tracking Service -->
         <service
-            android:name=".service.GPS_Tracking"
+            android:name=".service.TrackingService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="location" />

@@ -41,4 +41,8 @@ interface ActivityDao {
 
     @Query("SELECT * FROM activities ORDER BY startTime DESC LIMIT 1")
     suspend fun getLatestActivity(): Activity?
+
+    @Query("SELECT * FROM activities")
+    suspend fun getAllActivitiesOnce(): List<Activity>
+
 }

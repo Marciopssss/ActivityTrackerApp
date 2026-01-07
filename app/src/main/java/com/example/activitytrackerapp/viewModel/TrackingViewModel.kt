@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.activitytrackerapp.data.model.*
 import com.example.activitytrackerapp.data.repository.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -21,6 +23,12 @@ class TrackingViewModel(
 
     private val _currentActivity = MutableStateFlow<Activity?>(null)
     val currentActivity: StateFlow<Activity?> = _currentActivity.asStateFlow()
+
+    // --- NEW: elapsed timer ---
+    private val _elapsedTime = MutableStateFlow(0L)
+    val elapsedTime: StateFlow<Long> = _elapsedTime.asStateFlow()
+
+    private var timerJob: Job? = null
 
     val recentActivities = currentUserId.flatMapLatest { userId ->
         activityRepository.getRecentActivities(userId, 10)
@@ -42,6 +50,7 @@ class TrackingViewModel(
         PeriodStats("", 0.0, 0, 0, 0.0, 0)
     )
 
+    // --- Start Activity ---
     fun startActivity(type: ActivityType) {
         viewModelScope.launch {
             val activity = Activity(
@@ -60,9 +69,20 @@ class TrackingViewModel(
             val id = activityRepository.insertActivity(activity)
             _currentActivity.value = activity.copy(id = id)
             _trackingState.value = TrackingState.TRACKING
+
+            // --- Start timer ---
+            _elapsedTime.value = 0L
+            timerJob?.cancel()
+            timerJob = viewModelScope.launch {
+                while (_trackingState.value == TrackingState.TRACKING) {
+                    delay(1000L)
+                    _elapsedTime.value += 1000L
+                }
+            }
         }
     }
 
+    // --- Update Activity ---
     fun updateActivity(
         distance: Double,
         speed: Double,
@@ -89,30 +109,46 @@ class TrackingViewModel(
         }
     }
 
+    // --- Pause Timer ---
     fun pauseActivity() {
         _trackingState.value = TrackingState.PAUSED
+        timerJob?.cancel()
     }
 
+    // --- Resume Timer ---
     fun resumeActivity() {
         _trackingState.value = TrackingState.TRACKING
-    }
-
-    fun completeActivity() {
-        viewModelScope.launch {
-            _currentActivity.value?.let { activity ->
-                activityRepository.completeActivity(activity)
-                _currentActivity.value = null
-                _trackingState.value = TrackingState.IDLE
+        timerJob?.cancel()
+        timerJob = viewModelScope.launch {
+            while (_trackingState.value == TrackingState.TRACKING) {
+                delay(1000L)
+                _elapsedTime.value += 1000L
             }
         }
     }
 
+    // --- Complete Activity ---
+    fun completeActivity() {
+        viewModelScope.launch {
+            timerJob?.cancel()
+            _currentActivity.value?.let { activity ->
+                activityRepository.completeActivity(activity)
+                _currentActivity.value = null
+                _trackingState.value = TrackingState.IDLE
+                _elapsedTime.value = 0L
+            }
+        }
+    }
+
+    // --- Cancel Activity ---
     fun cancelActivity() {
         viewModelScope.launch {
+            timerJob?.cancel()
             _currentActivity.value?.let { activity ->
                 activityRepository.deleteActivity(activity)
                 _currentActivity.value = null
                 _trackingState.value = TrackingState.IDLE
+                _elapsedTime.value = 0L
             }
         }
     }
@@ -130,7 +166,7 @@ class TrackingViewModel(
             ActivityType.ACTIVITIES -> 4.0
         }
 
-        val weight = 70.0 // Assume 70kg, can be customized
+        val weight = 70.0 // Assume 70kg
         return (met * weight * hours).toInt()
     }
 

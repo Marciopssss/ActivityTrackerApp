@@ -22,4 +22,9 @@ interface AchievementDao {
 
     @Query("UPDATE achievements SET isUnlocked = 1, unlockedAt = :date WHERE id = :achievementId")
     suspend fun unlockAchievement(achievementId: Long, date: Date)
+
+    // ✅ Add this to fetch all achievements for backup
+    @Query("SELECT * FROM achievements")
+    suspend fun getAllAchievements(): List<Achievement>
 }
+

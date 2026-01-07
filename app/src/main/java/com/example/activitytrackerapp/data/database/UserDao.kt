@@ -30,4 +30,8 @@ interface UserDao {
 
     @Query("UPDATE users SET currentStreak = :streak WHERE id = :userId")
     suspend fun updateStreak(userId: String, streak: Int)
+
+    // ✅ Add this to fix BackupManager
+    @Query("SELECT * FROM users")
+    suspend fun getAllUsers(): List<User>
 }
